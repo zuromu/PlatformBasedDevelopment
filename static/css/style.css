@@ -239,4 +239,75 @@ h1, .brand {
     .arsenal-card:hover p {
         color: var(--paper);
     }
-    
+
+
+.experience-section {
+    padding: 4rem 0;
+    border-top: 2px solid var(--ink);
+}
+
+.experience-section h2 {
+    font-family: "Space Grotesk", -apple-system, sans-serif;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+}
+
+.experience-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.exp-row {
+    padding: 2rem 0;
+    border-bottom: 2px solid var(--ink);
+    transition: padding-left 0.2s ease, background-color 0.2s ease;
+}
+
+.exp-row:hover {
+    background-color: var(--ink);
+    color: var(--paper);
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+.exp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.25rem;
+}
+
+.exp-header h3 {
+    font-size: 1.4rem;
+}
+
+.exp-date {
+    font-family: "Space Grotesk", monospace;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.exp-sub {
+    color: var(--accent-dark);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+}
+
+.exp-row:hover .exp-sub {
+    color: var(--accent);
+}
+
+@media (max-width: 600px) {
+    .exp-header {
+        flex-direction: column;
+    }
+    .exp-date {
+        margin-top: 0.25rem;
+        margin-bottom: 0.5rem;
+    }
+}
