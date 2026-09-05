@@ -34,25 +34,30 @@
 5. **Access the application at http://127.0.0.1:8000/.**
 
 
+## Weekly Progress
+
+**Week 1: Static Web Basics**
+- [x] Set up the base Django project and got it running on PWS.
+- [x] Structured the page using proper semantic HTML (`<header>`, `<main>`, `<section>`, `<article>`) instead of just spamming `<div>` tags.
+- [x] Wrote custom CSS using CSS variables for a raw, high-contrast look.
+- [x] Fixed mobile responsiveness using basic CSS Grid and Flexbox.
+- [x] Added smooth scrolling and hover animations.
+- [x] Replaced the tutorial sample data with my actual info (Skills, Experiences, Info).
+
+
 ### Assignment 1
 
-1. Usage of Semantic HTML5 Elements:
-For the structure, I definitely leaned into semantic HTML5 tags like `<section>` and `<article>`. Instead of just nesting endless, meaningless `<div>` tags everywhere, I used `<section>` to create clear, logical boundaries between areas like my Tech Arsenal and my Experience (such as my UI/UX Intern stint at BEM Fasilkom). Inside those sections, I used `<article>` to wrap standalone content blocks. It honestly just makes the DOM so much easier to read when I'm debugging, and it’s way better for screen readers since the structure essentially documents itself.
+**1. Usage of Semantic HTML5 Elements:**
+I used semantic tags like `<section>` and `<article>` to organize the page structure. `<section>` separates the main areas (Profile, Tech Arsenal, Experience), and `<article>` wraps the individual items, like my UI/UX role at BEM Fasilkom. It keeps the code much cleaner than using generic `<div>` tags for everything, makes debugging easier, and is better for screen reader accessibility.
 
-2. CSS Responsive Layout Challenges:
-The biggest headache was keeping my Hero section and Tech Arsenal from getting completely squished on mobile screens. I had a nice horizontal grid going for desktop, but on smaller screens, it just wasn't readable. I had to decide what to prioritize, and readability easily won out over keeping the horizontal layout. I fixed it by throwing in a @media (max-width: 600px) query to override my desktop grid-template-columns. This collapses the layout into a single 1fr vertical column, forcing everything to stack naturally and making it actually usable on a phone.
+**2. CSS Responsive Layout Challenges:**
+The main challenge was the grid layout breaking on mobile screens. The side-by-side cards in the Tech Arsenal and Experience sections got too narrow to read. I solved this by adding a `@media (max-width: 600px)` query. It changes the `grid-template-columns` to `1fr` so the content stacks vertically instead of trying to squeeze horizontally.
 
-3. Limitations of Static Web & Future Enhancements:
-Building a purely static site is fine for a one-off, but the limitations get annoying fast. If I want to add a new skill, update my experiences, or even just fix a typo, I have to manually dig into the HTML and push a whole new commit. It’s just not scalable for a growing portfolio. For the next iteration, I’m really looking forward to plugging in a dynamic Django backend. That way, I can manage, add, and delete portfolio entries through a secure admin database without ever having to touch the raw source code again.
+**3. Limitations of Static Web & Future Enhancements:**
+Static websites are difficult to maintain. Every time I want to add a new skill or update my experience, I have to edit the hardcoded HTML and push a new commit. For future iterations, I plan to use Django models and a database so I can add or edit portfolio items dynamically through an admin panel without touching the raw code.
 
-AI Usage Disclosure:
-I used AI as a collaborative coding partner for this assignment.
-- Prompt Strategy: 
-I specifically prompted the AI to avoid generic, "vibe-coded" modern web trends (like soft gradients or pill buttons) and asked for CSS Grid/Flexbox boilerplate to help me build a more raw, minimalist/brutalist aesthetic.
-
-- Limitations & Manual Fixes: 
-While the AI was great at generating the baseline CSS and the logic for the high-contrast hover inversions, it isn't perfect. I had to manually tweak the grid spacing and handle all the Git branching, troubleshooting, and responsive quirks that the AI missed. I also manually integrated all my personal data and finalized the styling.
-
-- AI Chat Log:
-https://share.gemini.google/mh22PtnrSk50   
-
+**AI Usage Disclosure:**
+I used Gemini to help write the initial CSS boilerplate for this assignment. 
+- **Prompt Strategy:** I asked the AI to generate CSS Grid and Flexbox layouts. I specifically told it to avoid modern "vibe" trends (like gradients, soft shadows, and rounded buttons) and instead use a sharp, high-contrast minimalist style.
+- **Limitations & Manual Fixes:** The AI output was a starting point, but I had to manually adjust the grid spacing, fix CSS syntax errors (like putting styles inside the wrong media query), and handle the actual responsive breakpoint logic. I also managed the Git branching and PWS deployment entirely manually, and wrote the HTML content to include my actual data.
+- **AI Chat Log:** https://share.gemini.google/mh22PtnrSk50
