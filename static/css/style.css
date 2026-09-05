@@ -11,7 +11,7 @@
     --accent-dark: #44bce1;
     --line: #e3d9c9;
     --text-muted: #59686b;
-    --radius: 4px;
+    --radius: 67px;
 }
 
 body {
@@ -57,6 +57,7 @@ h1, .brand {
     color: var(--ink);
     text-decoration: none;
     font-size: 0.95rem;
+    font-weight: 467;
 }
 .hero {
     padding: 4.5rem 0 5rem;
@@ -190,3 +191,52 @@ h1, .brand {
         justify-content: flex-start;
     }
 }
+
+    .arsenal-section {
+        padding: 4rem 0;
+        border-top: 2px solid var(--ink);
+    }
+
+    .arsenal-section h2 {
+        font-family: "Space Grotesk", -apple-system, sans-serif;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+    }
+
+    .arsenal-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .arsenal-card {
+        border: 2px solid var(--ink);
+        padding: 1.5rem;
+        background-color: var(--paper);
+        border-radius: 0; 
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .arsenal-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .arsenal-card p {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        transition: color 0.15s ease;
+    }
+
+    
+    .arsenal-card:hover {
+        background-color: var(--ink);
+        color: var(--paper);
+    }
+
+    .arsenal-card:hover p {
+        color: var(--paper);
+    }
+    
