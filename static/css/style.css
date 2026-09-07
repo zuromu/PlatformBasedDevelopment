@@ -155,15 +155,23 @@ h1, .brand {
     font-size: 0.85rem;
     font-weight: 600;
     text-decoration: none;
-    color: var(--paper);
-    background-color: var(--ink);
+    color: var(--ink); 
+    background-color: var(--paper); 
     border-radius: var(--radius);
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0px 0px var(--ink);
     padding: 0.5rem 1.1rem;
-    transition: background-color 0.2s ease;
+    transition: all 0.1s ease;
+    position: relative;
+    top: 0;
+    left: 0;
 }
 
 .social-link:hover {
     background-color: var(--accent);
+    box-shadow: 0px 0px 0px 0px var(--ink);
+    top: 4px;
+    left: 4px;
 }
 
 .hero-photo {
@@ -171,6 +179,7 @@ h1, .brand {
     align-self: center;
     position: relative;
     -webkit-touch-callout: none; 
+    -webkit-user-select: none;
     user-select: none; 
 }
 
@@ -216,13 +225,13 @@ h1, .brand {
     transition: opacity 0.15s ease;
 }
 
-@media (hover: hover) {
+@media (pointer: fine) {
     .hero-photo:hover .gif-img {
         opacity: 1;
     }
 }
 
-@media (hover: none) {
+@media (pointer: coarse) {
     .hero-photo:active .gif-img {
         opacity: 1;
     }
@@ -283,7 +292,11 @@ h1, .brand {
         padding: 1.5rem;
         background-color: var(--paper);
         border-radius: 0; 
-        transition: background-color 0.15s ease, color 0.15s ease;
+        box-shadow: 6px 6px 0px 0px var(--ink); 
+        transition: all 0.15s ease;
+        position: relative;
+        top: 0;
+        left: 0;
     }
 
     .arsenal-card h3 {
@@ -299,12 +312,14 @@ h1, .brand {
 
     
     .arsenal-card:hover {
-        background-color: var(--ink);
-        color: var(--paper);
+        background-color: var(--accent);
+        box-shadow: 0px 0px 0px 0px var(--ink); 
+        top: 6px; 
+        left: 6px; 
     }
 
     .arsenal-card:hover p {
-        color: var(--paper);
+        color: var(--ink);
     }
 
 
