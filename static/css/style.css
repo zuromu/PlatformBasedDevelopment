@@ -170,6 +170,8 @@ h1, .brand {
     grid-area: photo;
     align-self: center;
     position: relative;
+    -webkit-touch-callout: none; 
+    user-select: none; 
 }
 
 .photo-block {
@@ -196,6 +198,7 @@ h1, .brand {
     object-fit: cover;
     border-radius: var(--radius);
     border: 3px solid var(--ink);
+    pointer-events: none; 
 }
 
 .static-img {
