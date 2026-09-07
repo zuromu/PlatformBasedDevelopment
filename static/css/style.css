@@ -312,14 +312,15 @@ h1, .brand {
 
     
     .arsenal-card:hover {
-        background-color: var(--accent);
+        background-color: var(--ink); 
+        color: var(--paper); 
         box-shadow: 0px 0px 0px 0px var(--ink); 
         top: 6px; 
         left: 6px; 
     }
 
-    .arsenal-card:hover p {
-        color: var(--ink);
+    .arsenal-card:hover p, .arsenal-card:hover h3 {
+        color: var(--paper);
     }
 
 
