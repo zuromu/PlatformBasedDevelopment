@@ -67,7 +67,24 @@ h1, .brand {
     text-decoration: none;
     font-size: 0.95rem;
     font-weight: 467;
+    position: relative;
 }
+
+.site-header nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px; 
+    width: 0; 
+    height: 4px; 
+    background-color: var(--accent);
+    transition: width 0.2s ease-out; 
+}
+
+.site-header nav a:hover::after {
+    width: 100%;
+}
+
 .hero {
     padding: 4.5rem 0 5rem;
 }
@@ -208,6 +225,11 @@ h1, .brand {
 }
 
 @media (max-width: 600px) {
+    .site-header .container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
     .hero-grid {
         grid-template-columns: 1fr;
         grid-template-areas:
