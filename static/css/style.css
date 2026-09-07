@@ -213,8 +213,16 @@ h1, .brand {
     transition: opacity 0.15s ease;
 }
 
-.hero-photo:hover .gif-img {
-    opacity: 1;
+@media (hover: hover) {
+    .hero-photo:hover .gif-img {
+        opacity: 1;
+    }
+}
+
+@media (hover: none) {
+    .hero-photo:active .gif-img {
+        opacity: 1;
+    }
 }
 
 .site-footer {
