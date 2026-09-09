@@ -6,7 +6,7 @@ from main.models import Experience, Project
 def show_main(request):
     context = {
         "name": "Ahmad Hoesin",
-        "npm": "2506555400",
+        "npm": "25065&#8203;55400",
         "study_program": "S1 Ilmu Komputer KKI",
         "bio": (
             "A Computer Science student at Universitas Indonesia interested "
