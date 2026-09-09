@@ -1,8 +1,9 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.html import escape
 
-from main.models import Experience
+from main.models import Experience, Project
 
 
 class MainTest(TestCase):
@@ -56,3 +57,30 @@ class MainTest(TestCase):
         self.assertFalse(self.experience.is_ongoing)
         self.assertContains(response, "Completed")
         self.assertNotContains(response, "Ongoing")
+
+class ProjectTest(TestCase):
+    def setUp(self):
+        self.project = Project.objects.create(
+            name="Wanderer's Koperasi Quest",
+            tech_stack="JavaScript, HTML, CSS, Phaser",
+            description="RPG Edukasi Keuangan yang mengajarkan konsep koperasi Indonesia lewat petualangan.",
+            github_url="https://github.com/zuromu/Wanderers-Koperasi"
+        )
+
+    def test_project_model(self):
+        self.assertEqual(str(self.project), "Wanderer's Koperasi Quest")
+        self.assertEqual(self.project.tech_stack, "JavaScript, HTML, CSS, Phaser")
+
+    def test_projects_page_is_accessible_and_renders_data(self):
+        response = self.client.get(reverse("main:show_projects"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "projects.html")
+        self.assertContains(response, escape("Wanderer's Koperasi Quest"))
+        self.assertContains(response, "JavaScript, HTML, CSS, Phaser")
+        self.assertContains(response, "RPG Edukasi Keuangan yang mengajarkan konsep koperasi Indonesia lewat petualangan.")
+        self.assertContains(response, "https://github.com/zuromu/Wanderers-Koperasi")
+        
+    def test_empty_projects_page(self):
+        Project.objects.all().delete()
+        response = self.client.get(reverse("main:show_projects"))
+        self.assertContains(response, "No projects have been added yet.")
