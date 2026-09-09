@@ -45,10 +45,10 @@
 - [x] Replaced the tutorial sample data with my actual info (Skills, Experiences, Info).
 
 **Week 2: Django Models, Views, and Templates (MVT)**
--[x] Built a custom `Project` model in `models.py` (and ran the migrations to back it up).
--[x] Wired up the views and URL routing so the new `/projects/` page actually loads.
--[x] Swapped out hardcoded HTML for Django Template tags to render database records dynamically.
--[x] Wrote unit tests in `tests.py` (and figured out how to use `django.utils.html.escape` so an apostrophe wouldn't break my assertions).
+- [x] Built a custom `Project` model in `models.py` (and ran the migrations to back it up).
+- [x] Wired up the views and URL routing so the new `/projects/` page actually loads.
+- [x] Swapped out hardcoded HTML for Django Template tags to render database records dynamically.
+- [x] Wrote unit tests in `tests.py` (and figured out how to use `django.utils.html.escape` so an apostrophe wouldn't break my assertions).
 
 
 ### Assignment 1
@@ -70,13 +70,13 @@ I used Gemini to help write the initial CSS boilerplate for this assignment.
 
 
 ### Assignment 2
-**1. Explain what happens when a user opens the new portfolio page, starting from the request received by the project until the data appears in the browser.**
+**1. Explain what happens when a user opens the new portfolio page, starting from the request received by the project until the data appears in the browser:**
 When a user hits the `/projects/` URL, the request goes straight to the project's main `urls.py`. That file passes the baton to the main app's `urls.py`, which triggers the `show_projects` function inside `views.py`. The view basically taps the `Project` model on the shoulder and asks the database for all the project records using P`roject.objects.all()`. It bundles all that data into a dictionary (the context) and throws it over to `projects.html`. Finally, Django's template engine runs a `{% for %}` loop, injecting my actual project details into the HTML skeleton before shipping the final page back to the user's browser.
 
-**2. Why should the data for the new portfolio section be stored in a model instead of being written directly in the template?**
+**2. Why should the data for the new portfolio section be stored in a model instead of being written directly in the template:**
 It is all about separating the content from the presentation layer. If I hardcode everything directly into the HTML, adding a new project means opening the editor, copying a block of markup, risking a missing closing tag, and pushing a whole new Git commit. By using a database model, the HTML acts as a dumb, reusable skeleton. It makes maintenance effortless. Down the line, I can just log into a Django admin panel, fill out a form to add a new project, and the site updates automatically without me ever touching the raw code.
 
-**3. What is the difference between makemigrations and migrate in Django? Give an example.**
+**3. What is the difference between makemigrations and migrate in Django? Give an example:**
 - `makemigrations` is the drafting phase. When I wrote the `Project` class, running this told Django to scan my code and spit out a blueprint file in the `migrations/` folder. It basically takes notes on what needs to change, but leaves the actual database alone.
 - `migrate` is the builder. It reads those blueprints and executes the real SQL commands to update the database.
 - Example: When I built the `Project` model, `makemigrations` just drafted the fields (name, tech stack, etc.). Running `migrate` is what actually built the physical `main_project` table in my SQLite database so I could start saving my projects to it.
