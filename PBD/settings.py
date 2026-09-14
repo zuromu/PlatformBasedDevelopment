@@ -59,6 +59,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'PBD.urls'
+CSRF_TRUSTED_ORIGINS = ["https://ahmad-hoesin-myportofolio.pws.cs.ui.ac.id"]
 
 TEMPLATES = [
     {
