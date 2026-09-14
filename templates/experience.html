@@ -33,7 +33,10 @@
                             {% if experience.thumbnail %}
                                 <img src="{{ experience.thumbnail }}"
                                      alt="{{ experience.title }} image"
-                                     class="experience-image">
+                                     class="experience-image"
+                                     loading="lazy"
+                                     decoding="async">
+
                             {% endif %}
                             <h2>{{ experience.title }}</h2>
                             <span class="experience-category">{{ experience.tech_stack }}</span>

@@ -25,16 +25,14 @@
   </header>
 
     {% if messages %}
-    <div class="container" style="margin-top: 1rem;">
-        <ul class="messages">
-            {% for message in messages %}
-            <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>
-                {{ message }}
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% endif %}  
+    <ul class="django-messages">
+        {% for message in messages %}
+        <li {% if message.tags %} class="{{ message.tags }} toast-notification"{% endif %}>
+            {{ message }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 
   {% block content %} {% endblock content %}
 

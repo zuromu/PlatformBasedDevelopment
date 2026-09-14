@@ -29,20 +29,22 @@
             Are you sure you want to delete the experience
             <strong>{{ experience.title }}</strong>?
         </p>
-        <div class="experience-delete-modal__actions">
-            <button type="button"
-                    class="button button-secondary"
-                    popovertarget="delete-experience-{{ experience.id }}"
-                    popovertargetaction="hide">Cancel</button>
-            <form method="post" action="{% url 'main:delete_experience' experience.id %}">
-                {% csrf_token %}
-                
-                <div class="form-group" style="margin-bottom: 1rem; text-align: left;">
-                    <label for="secret_code_{{ experience.id }}">Portfolio Secret Code:</label>
-                    <input type="password" name="secret_code" id="secret_code_{{ experience.id }}" required>
-                </div>
+        
+        <form method="post" action="{% url 'main:delete_experience' experience.id %}">
+            {% csrf_token %}
+            
+            <div class="form-group" style="margin: 1.5rem 0; text-align: left;">
+                <label for="secret_code_{{ experience.id }}" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Portfolio Secret Code:</label>
+                <input type="password" name="secret_code" id="secret_code_{{ experience.id }}" required style="width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px;">
+            </div>
+
+            <div class="experience-delete-modal__actions">
+                <button type="button"
+                        class="button button-secondary"
+                        popovertarget="delete-experience-{{ experience.id }}"
+                        popovertargetaction="hide">Cancel</button>
                 <button type="submit" class="button button-danger">Yes, Delete</button>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 </div>
