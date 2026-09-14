@@ -1,14 +1,17 @@
 {% extends "base.html" %}
+
 {% block meta %}
-    <title>Add Experience - {{ name }}</title>
+    <title>{% if project %}Edit Project{% else %}Add Project{% endif %} - {{ name }}</title>
 {% endblock meta %}
+
 {% block content %}
     <main>
         <section class="experience-section">
             <div class="container">
-                <h1>{% if experience %}Edit Experience{% else %}Add New Experience{% endif %}</h1>
-                <form method="post" action="" class="experience-form">
+                <h1>{% if project %}Edit Project{% else %}Add New Project{% endif %}</h1>
+                <form method="post" action="" class="project-form">
                     {% csrf_token %}
+                    
                     {% for field in form %}
                         <div class="form-group">
                             <label for="{{ field.id_for_label }}">{{ field.label }}</label>
@@ -24,8 +27,8 @@
                         <input type="password" name="secret_code" id="secret_code" required>
                     </div>
 
-                    <button type="submit" class="button">Add Experience</button>
-                    <a href="{% url 'main:show_experience' %}" class="button button-secondary">Cancel</a>
+                    <button type="submit" class="button">Save Project</button>
+                    <a href="{% url 'main:show_projects' %}" class="button button-secondary">Cancel</a>
                 </form>
             </div>
         </section>
