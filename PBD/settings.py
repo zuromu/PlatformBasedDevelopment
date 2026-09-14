@@ -34,6 +34,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "ahmad-hoesin-myportofolio.pws.cs.ui.
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 
 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -152,3 +153,6 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+#super secret passcode
+PORTFOLIO_SECRET_CODE = os.getenv("PORTFOLIO_SECRET_CODE")

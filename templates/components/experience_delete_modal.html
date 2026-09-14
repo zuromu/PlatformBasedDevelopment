@@ -36,6 +36,11 @@
                     popovertargetaction="hide">Cancel</button>
             <form method="post" action="{% url 'main:delete_experience' experience.id %}">
                 {% csrf_token %}
+                
+                <div class="form-group" style="margin-bottom: 1rem; text-align: left;">
+                    <label for="secret_code_{{ experience.id }}">Portfolio Secret Code:</label>
+                    <input type="password" name="secret_code" id="secret_code_{{ experience.id }}" required>
+                </div>
                 <button type="submit" class="button button-danger">Yes, Delete</button>
             </form>
         </div>

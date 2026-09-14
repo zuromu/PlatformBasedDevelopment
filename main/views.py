@@ -3,13 +3,23 @@ from django.contrib import messages
 from main.models import Experience, Project
 from main.forms import ExperienceForm
 from django.core import serializers
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
+from django.conf import settings
 
 
 def add_experience(request):
     form = ExperienceForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
+        submitted_code = request.POST.get("secret_code")
+        if submitted_code != settings.PORTFOLIO_SECRET_CODE:
+            messages.error(request, "Incorrect secret code. You do not have permission to add an experience.")
+            context = {
+                "name": "Ahmad Hoesin",
+                "form": form,
+            }
+            return render(request, "experience_form.html", context)
+        
         form.save()
         messages.success(request, "New Experience Added!")
         return redirect("main:show_experience")
@@ -70,11 +80,15 @@ def get_experience_json(request):
     return HttpResponse(experience_json, content_type="application/json")
 
 def delete_experience(request, experience_id):
-    experience = get_object_or_404(Experience, pk=experience_id)
-
-    if request.method == "POST":
-        experience.delete()
-        messages.success(request, "Experience deleted successfully.")
+        experience = get_object_or_404(Experience, pk=experience_id)
+        if request.method == "POST":
+            submitted_code = request.POST.get("secret_code")
+            if submitted_code != settings.PORTFOLIO_SECRET_CODE:
+                messages.error(request, "Incorrect secret code. Experience was not deleted.")
+                return redirect("main:show_experience")
+            
+            experience.delete()
+            messages.success(request, "Experience deleted successfully.")
+            return redirect("main:show_experience")
         return redirect("main:show_experience")
 
-    return redirect("main:show_experience")
