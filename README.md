@@ -50,6 +50,13 @@
 - [x] Swapped out hardcoded HTML for Django Template tags to render database records dynamically.
 - [x] Wrote unit tests in `tests.py` (and figured out how to use `django.utils.html.escape` so an apostrophe wouldn't break my assertions).
 
+**Week 3: something**
+- [x] 
+- [x] 
+- [x] 
+- [x] 
+
+
 
 ### Assignment 1
 
@@ -86,3 +93,22 @@ I used Gemini as a thought partner to get comfortable with the Django MVT flow a
 - **Prompt Strategy:** I asked Gemini to help me set up the initial boilerplate for the `Project` model and view. I also ran into a weird bug where an apostrophe in my projects' title broke the automated tests, so I asked for the cleanest way to handle HTML escaping in Django.
 - **Limitations & Manual Fixes:** The AI gave me the `escape()` function fix, but I manually wrote the test logic, injected the actual real-world data for my projects, and hooked up the HTML template to match my raw CSS design from last week.
 - **AI Chat Log:** https://share.gemini.google/zxuAI6ST87Br 
+
+
+### Assignment 3
+**1. Explain why we use Django’s `ModelForm` instead of creating HTML forms manually. Additionally, explain why we are required to add `{% csrf_token %}` to these forms:**
+
+
+**2. In Tutorial 03, we discussed JSON and XML data formats. Why is JSON preferred in modern web application development compared to XML:**
+
+
+**3. Explain the flow that occurs when you use a view function to return your portfolio data in JSON format. Why do we need to perform the serialization process on Django models before returning the data:**
+
+
+
+
+**AI Usage Disclosure:**
+I used Gemini 
+- **Prompt Strategy:** 
+- **Limitations & Manual Fixes:** 
+- **AI Chat Log:** 
