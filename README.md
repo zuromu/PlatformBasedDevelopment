@@ -50,7 +50,7 @@
 - [x] Swapped out hardcoded HTML for Django Template tags to render database records dynamically.
 - [x] Wrote unit tests in `tests.py` (and figured out how to use `django.utils.html.escape` so an apostrophe wouldn't break my assertions).
 
-**Week 3: something**
+**Week 3: Forms & Data Delivery**
 - [x] Refactored all my HTML files so they extend a main `base.html` skeleton template instead of repeating the navbar and footer everywhere.
 - [x] Set up a `ModelForm` so I can actually add and edit projects dynamically.
 - [x] Added a delete button with a pop-up confirmation modal so I don't accidentally delete stuff.
@@ -78,7 +78,7 @@ I used Gemini to help write the initial CSS boilerplate for this assignment.
 
 ### Assignment 2
 **1. Explain what happens when a user opens the new portfolio page, starting from the request received by the project until the data appears in the browser:**
-When a user hits the `/projects/` URL, the request goes straight to the project's main `urls.py`. That file passes the baton to the main app's `urls.py`, which triggers the `show_projects` function inside `views.py`. The view basically taps the `Project` model on the shoulder and asks the database for all the project records using P`roject.objects.all()`. It bundles all that data into a dictionary (the context) and throws it over to `projects.html`. Finally, Django's template engine runs a `{% for %}` loop, injecting my actual project details into the HTML skeleton before shipping the final page back to the user's browser.
+When a user hits the `/projects/` URL, the request goes straight to the project's main `urls.py`. That file passes the baton to the main app's `urls.py`, which triggers the `show_projects` function inside `views.py`. The view basically taps the `Project` model on the shoulder and asks the database for all the project records using `Project.objects.all()`. It bundles all that data into a dictionary (the context) and throws it over to `projects.html`. Finally, Django's template engine runs a `{% for %}` loop, injecting my actual project details into the HTML skeleton before shipping the final page back to the user's browser.
 
 **2. Why should the data for the new portfolio section be stored in a model instead of being written directly in the template:**
 It is all about separating the content from the presentation layer. If I hardcode everything directly into the HTML, adding a new project means opening the editor, copying a block of markup, risking a missing closing tag, and pushing a whole new Git commit. By using a database model, the HTML acts as a dumb, reusable skeleton. It makes maintenance effortless. Down the line, I can just log into a Django admin panel, fill out a form to add a new project, and the site updates automatically without me ever touching the raw code.
