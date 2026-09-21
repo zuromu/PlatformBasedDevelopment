@@ -1,0 +1,24 @@
+<div id="delete-project-{{ project.id }}" class="project-delete-modal" popover="auto" role="dialog" aria-modal="true">
+    <button type="button" class="project-delete-modal__backdrop" popovertarget="delete-project-{{ project.id }}" popovertargetaction="hide"></button>
+    
+    <div class="project-delete-modal__content">
+        <button type="button" class="project-delete-modal__close" popovertarget="delete-project-{{ project.id }}" popovertargetaction="hide">×</button>
+        
+        <h2>Delete Project?</h2>
+        <p>Are you sure you want to delete <strong>{{ project.name }}</strong>?</p>
+        
+        <form method="post" action="{% url 'main:delete_project' project.id %}">
+            {% csrf_token %}
+            
+            <div class="form-group" style="text-align: left; margin-bottom: 1rem;">
+                <label for="secret_code_{{ project.id }}" style="font-size: 0.9rem;">Portfolio Secret Code:</label>
+                <input type="password" name="secret_code" id="secret_code_{{ project.id }}" required style="width: 100%; padding: 0.5rem; margin-top: 0.25rem; border: 1px solid var(--ink);">
+            </div>
+            
+            <div class="project-delete-modal__actions">
+                <button type="button" class="button button-secondary" popovertarget="delete-project-{{ project.id }}" popovertargetaction="hide">Cancel</button>
+                <button type="submit" class="button button-danger" style="background-color: #b42318; color: white;">Yes, Delete</button>
+            </div>
+        </form>
+    </div>
+</div>

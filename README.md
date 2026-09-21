@@ -50,6 +50,13 @@
 - [x] Swapped out hardcoded HTML for Django Template tags to render database records dynamically.
 - [x] Wrote unit tests in `tests.py` (and figured out how to use `django.utils.html.escape` so an apostrophe wouldn't break my assertions).
 
+**Week 3: something**
+- [x] Refactored all my HTML files so they extend a main `base.html` skeleton template instead of repeating the navbar and footer everywhere.
+- [x] Set up a `ModelForm` so I can actually add and edit projects dynamically.
+- [x] Added a delete button with a pop-up confirmation modal so I don't accidentally delete stuff.
+- [x] Built a JSON API endpoint (`/api/projects/`) using Django serializers to serve my data.
+
+
 
 ### Assignment 1
 
@@ -86,3 +93,25 @@ I used Gemini as a thought partner to get comfortable with the Django MVT flow a
 - **Prompt Strategy:** I asked Gemini to help me set up the initial boilerplate for the `Project` model and view. I also ran into a weird bug where an apostrophe in my projects' title broke the automated tests, so I asked for the cleanest way to handle HTML escaping in Django.
 - **Limitations & Manual Fixes:** The AI gave me the `escape()` function fix, but I manually wrote the test logic, injected the actual real-world data for my projects, and hooked up the HTML template to match my raw CSS design from last week.
 - **AI Chat Log:** https://share.gemini.google/zxuAI6ST87Br 
+
+
+### Assignment 3
+**1. Explain why we use Django’s `ModelForm` instead of creating HTML forms manually. Additionally, explain why we are required to add `{% csrf_token %}` to these forms:**
+Writing HTML forms manually takes forever because you have to write out every single `<input>` tag and then manually catch all the `request.POST` data in your view to save it. `ModelForm` basically just looks at my database model and builds the whole form for me, plus it handles data validation automatically. As for the `{% csrf_token %}`, it is a strict security requirement. It stops Cross-Site Request Forgery, which is when a malicious site tries to trick your browser into submitting a form to my site without me knowing. If that token isn't there, Django just blocks the submission completely.
+
+
+**2. In Tutorial 03, we discussed JSON and XML data formats. Why is JSON preferred in modern web application development compared to XML:**
+XML is just way too bulky. It relies on opening and closing tags for literally everything (like `<name>Ahmad</name>`), which makes the file size huge. JSON is much cleaner because it just uses simple key-value pairs (like `"name": "Ahmad"`), making it a lot lighter and faster to send over the internet. Plus, JSON literally stands for JavaScript Object Notation, so modern frontend frameworks can read and manipulate it natively without needing extra parsers.
+
+
+**3. Explain the flow that occurs when you use a view function to return your portfolio data in JSON format. Why do we need to perform the serialization process on Django models before returning the data:**
+When someone hits my JSON endpoint, the `urls.py` routes it to my view function. The view asks the database for all the projects using `Project.objects.all()`. But here is the catch: the database gives back complex Django Model objects, which web browsers and external APIs cannot understand. That is why we have to run `serializers.serialize("json", projects)`. Serialization translates those Python objects into a simple, standardized text string formatted as JSON. Finally, we wrap that string in an `HttpResponse` and ship it back to the client.
+
+
+
+
+**AI Usage Disclosure:**
+I barely used AI for this assignment since the Django MVT flow is starting to make sense.
+- **Prompt Strategy:** I only used it to help me figure out the HTML/CSS structure for the popup delete confirmation modal and the notification popups.
+- **Limitations & Manual Fixes:** I didn't use AI for any of the Python backend logic this time. I manually handled writing the `ModelForm`, creating the CRUD views, writing the JSON serializer endpoint, and refactoring all my HTML files to extend the `base.html` skeleton template.
+- **AI Chat Log:** https://share.gemini.google/tlReTHDvUMlX 

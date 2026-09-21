@@ -1,32 +1,47 @@
 {% extends "base.html" %}
+
 {% block meta %}
     <title>Projects - {{ name }}</title>
 {% endblock meta %}
-{% block content %}
 
-   <main>
+{% block content %}
+    <main>
         <section class="experience-section" id="projects">
             <div class="container">
-                <p class="section-kicker">What I've Been Building</p>
-                <h1>Projects</h1>
+                <p class="section-kicker">Built with Java, Python & Godot</p>
+                
+                <div class="project-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h1 style="margin: 0;">Projects</h1>
+                    <a href="{% url 'main:create_project' %}" class="button">
+                        + Add Project
+                    </a>
+                </div>
 
-                <div class="experience-grid">
+                <div class="experience-grid project-grid">
                     {% for project in projects_list %}
                         <article class="experience-card">
-                            <span class="experience-category">
+                            <span class="experience-category" style="color: var(--accent-dark); font-weight: 700; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;">
                                 {{ project.tech_stack }}
                             </span>
-                            <h2>{{ project.name }}</h2>
+                            <h2 style="margin-top: 0.5rem;">{{ project.name }}</h2>
                             <p class="experience-description">
                                 {{ project.description }}
                             </p>
-                            <p class="experience-status" style="margin-top: 0.5rem; margin-bottom: 1rem;">
-                                Added: {{ project.date_added }}
-                            </p>
 
-                            {% if project.github_url %}
-                                <a href="{{ project.github_url }}" target="_blank" class="social-link" style="font-size: 0.75rem; padding: 0.4rem 0.8rem;">View Repository</a>
-                            {% endif %}
+                            <div class="project-card-actions" style="margin-top: auto; padding-top: 1.5rem;">
+                                <div class="project-actions" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                                    {% if project.github_url %}
+                                        <a href="{{ project.github_url }}" target="_blank" class="button button-secondary">GitHub</a>
+                                    {% endif %}
+                                    <a href="{% url 'main:update_project' project.id %}" class="button button-secondary">Edit</a>
+                                    
+                                    <button type="button" class="button button-danger" popovertarget="delete-project-{{ project.id }}">
+                                        Delete
+                                    </button>
+                                    
+                                    {% include "components/project_delete_modal.html" with project=project %}
+                                </div>
+                            </div>
                         </article>
                     {% empty %}
                         <p class="empty-state">
@@ -37,6 +52,4 @@
             </div>
         </section>
     </main>
-    {% endblock content %}
-</body>
-</html>
+{% endblock content %}
