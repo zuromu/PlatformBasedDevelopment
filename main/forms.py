@@ -1,5 +1,7 @@
 from django import forms
-from django.forms import TextInput, Textarea, Select, URLInput
+from django.core.exceptions import ValidationError
+from django.forms import Select, Textarea, TextInput, URLInput
+from django.utils.html import strip_tags
 from main.models import Experience, Project
 
 class ExperienceForm(forms.ModelForm):
@@ -85,3 +87,15 @@ class ProjectForm(forms.ModelForm):
                 }
             ),
         }
+
+    def clean_name(self):
+            name = strip_tags(self.cleaned_data["name"]).strip()
+            if not name:
+                raise ValidationError("Project name can't contain only HTML tags.")
+            return name
+    
+    def clean_tech_stack(self):
+        return strip_tags(self.cleaned_data["tech_stack"]).strip()
+    
+    def clean_description(self):
+        return strip_tags(self.cleaned_data["description"]).strip()
