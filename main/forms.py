@@ -46,6 +46,19 @@ class ExperienceForm(forms.ModelForm):
                 }
             ),
         }
+        
+    def clean_title(self):
+        title = strip_tags(self.cleaned_data["title"]).strip()
+        if not title:
+            raise ValidationError("Title can't contain only HTML tags.")
+        return title
+
+    def clean_description(self):
+        return strip_tags(self.cleaned_data["description"]).strip()
+
+    def clean_category(self):
+        return strip_tags(self.cleaned_data["category"]).strip()
+        
 
 class ProjectForm(forms.ModelForm):
     class Meta:
