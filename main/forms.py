@@ -63,39 +63,20 @@ class ProjectForm(forms.ModelForm):
             "github_url": "GitHub Repository URL",
         }
         widgets = {
-            "name": TextInput(
-                attrs={
-                    "placeholder": "e.g., Wanderer's Koperasi Quest",
-                    "maxlength": 255,
-                }
-            ),
-            "tech_stack": TextInput(
-                attrs={
-                    "placeholder": "e.g., JavaScript, HTML, CSS, Phaser",
-                    "maxlength": 255,
-                }
-            ),
-            "description": Textarea(
-                attrs={
-                    "placeholder": "Describe what you built...",
-                    "rows": 4,
-                }
-            ),
-            "github_url": URLInput(
-                attrs={
-                    "placeholder": "https://github.com/zuromu/...",
-                }
-            ),
+            "name": TextInput(attrs={"placeholder": "e.g., Wanderer's Koperasi Quest", "maxlength": 255}),
+            "tech_stack": TextInput(attrs={"placeholder": "e.g., JavaScript, HTML, CSS, Phaser", "maxlength": 255}),
+            "description": Textarea(attrs={"placeholder": "Describe what you built...", "rows": 4}),
+            "github_url": URLInput(attrs={"placeholder": "https://github.com/zuromu/..."}),
         }
 
     def clean_name(self):
-            name = strip_tags(self.cleaned_data["name"]).strip()
-            if not name:
-                raise ValidationError("Project name can't contain only HTML tags.")
-            return name
-    
+        name = strip_tags(self.cleaned_data["name"]).strip()
+        if not name:
+            raise ValidationError("Project name can't contain only HTML tags.")
+        return name
+
     def clean_tech_stack(self):
         return strip_tags(self.cleaned_data["tech_stack"]).strip()
-    
+
     def clean_description(self):
         return strip_tags(self.cleaned_data["description"]).strip()
