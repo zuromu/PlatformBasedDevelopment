@@ -103,20 +103,6 @@ def delete_experience(request, experience_id):
 
 #Projects
 @login_required(login_url="/login/")
-def create_project(request):
-    if not request.user.is_superuser:
-        raise PermissionDenied
-    
-    form = ProjectForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "Project successfully added!")
-        return redirect("main:show_projects")
-    
-    context = {"form": form, "name": "Ahmad Hoesin"}
-    return render(request, "project_form.html", context)
-
-@login_required(login_url="/login/")
 def update_project(request, id):
     if not (request.user.is_superuser or is_editor(request.user)):
         raise PermissionDenied
