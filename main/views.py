@@ -26,22 +26,26 @@ def show_main(request):
     return render(request, "index.html", context)
 
 #Experience
+@login_required(login_url="/login/")
 def add_experience(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+        
     form = ExperienceForm(request.POST or None)
-
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, "New Experience Added!")
         return redirect("main:show_experience")
 
-    context = {
-        "name": "Ahmad Hoesin",
-        "form": form,
-    }
+    context = {"name": "Ahmad Hoesin", "form": form}
     return render(request, "experience_form.html", context)
 
 
+@login_required(login_url="/login/")
 def update_experience(request, experience_id):
+    if not (request.user.is_superuser or is_editor(request.user)):
+        raise PermissionDenied
+        
     experience = get_object_or_404(Experience, pk=experience_id)
     form = ExperienceForm(request.POST or None, instance=experience)
 
@@ -50,11 +54,7 @@ def update_experience(request, experience_id):
         messages.success(request, "Experience updated successfully!")
         return redirect("main:show_experience")
 
-    context = {
-        "name": "Ahmad Hoesin",
-        "form": form,
-        "experience": experience,
-    }
+    context = {"name": "Ahmad Hoesin", "form": form, "experience": experience}
     return render(request, "experience_form.html", context)
 
 def show_experience(request):
@@ -86,13 +86,17 @@ def get_experience_json(request):
     experience_json = serializers.serialize("json", experience)
     return HttpResponse(experience_json, content_type="application/json")
 
+@login_required(login_url="/login/")
 def delete_experience(request, experience_id):
-        experience = get_object_or_404(Experience, pk=experience_id)
-        if request.method == "POST":    
-            experience.delete()
-            messages.success(request, "Experience deleted successfully.")
-            return redirect("main:show_experience")
+    if not request.user.is_superuser:
+        raise PermissionDenied
+        
+    experience = get_object_or_404(Experience, pk=experience_id)
+    if request.method == "POST":
+        experience.delete()
+        messages.success(request, "Experience deleted successfully.")
         return redirect("main:show_experience")
+    return redirect("main:show_experience")
 
 
 #Projects
@@ -110,7 +114,11 @@ def create_project(request):
     context = {"form": form, "name": "Ahmad Hoesin"}
     return render(request, "project_form.html", context)
 
+@login_required(login_url="/login/")
 def update_project(request, id):
+    if not (request.user.is_superuser or is_editor(request.user)):
+        raise PermissionDenied
+        
     project = get_object_or_404(Project, pk=id)
     form = ProjectForm(request.POST or None, instance=project)
     
@@ -122,11 +130,11 @@ def update_project(request, id):
     context = {"form": form, "name": "Ahmad Hoesin", "project": project}
     return render(request, "project_form.html", context)
 
-@login_required(login_url="/login/") 
+@login_required(login_url="/login/")
 def delete_project(request, id):
     if not request.user.is_superuser:
         raise PermissionDenied
-    
+        
     project = get_object_or_404(Project, pk=id)
     if request.method == "POST":
         project.delete()
@@ -155,6 +163,7 @@ def show_projects(request):
     context = {
         "name": "Ahmad Hoesin",
         "projects_list": projects,
+        "is_editor": is_editor(request.user),
     }
     return render(request, "projects.html", context)
 
@@ -184,7 +193,7 @@ def login_user(request):
         return response
 
     context = {
-        "name": "Burhan",
+        "name": "Ahmad Hoesin",
         "form": form,
     }
     return render(request, "login.html", context)
@@ -195,17 +204,30 @@ def logout_user(request):
     response.delete_cookie('last_login')
     return response
 
-# No is_superuser check: any logged-in account may give a star
+#star
 @login_required(login_url="/login/")
-def toggle_star(request, project_id):
+def toggle_star_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
-
     if request.method == "POST":
-        # If this account has already starred it, remove the star.
-        # If not, add one.
         if request.user in project.starred_by.all():
             project.starred_by.remove(request.user)
         else:
             project.starred_by.add(request.user)
 
     return redirect("main:show_projects")
+
+@login_required(login_url="/login/")
+def toggle_star_experience(request, experience_id):
+    experience = get_object_or_404(Experience, pk=experience_id)
+    if request.method == "POST":
+        if request.user in experience.starred_by.all():
+            experience.starred_by.remove(request.user)
+        else:
+            experience.starred_by.add(request.user)
+    return redirect("main:show_experience")
+
+
+
+#Editor
+def is_editor(user):
+    return user.is_authenticated and user.groups.filter(name="Editor").exists()
