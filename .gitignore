@@ -120,3 +120,6 @@ sftp-config.json
 
 # macOS
 .DS_Store
+
+#test
+test_e2e.py
