@@ -71,6 +71,7 @@ def show_experience(request):
         "name": "Ahmad Hoesin",
         "experience_list": experience,
         "title_query": title_query,
+        "is_editor": is_editor(request.user),
     }
     return render(request, "experience.html", context)
 
@@ -230,4 +231,4 @@ def toggle_star_experience(request, experience_id):
 
 #Editor
 def is_editor(user):
-    return user.is_authenticated and user.groups.filter(name="Editor").exists()
+    return user.is_authenticated and user.groups.filter(name__iexact="editor").exists()
