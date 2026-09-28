@@ -35,9 +35,13 @@
                                     {% if project.github_url %}
                                         <a href="{{ project.github_url }}" target="_blank" class="button button-secondary">GitHub</a>
                                     {% endif %}
+                        
+                                    {% if user.is_superuser %}
                                     <a href="{% url 'main:update_project' project.id %}" class="button button-secondary">Edit</a>
+                                    {% endif %}
 
                                     {% include "components/project_star.html" with project=project %}
+
                                     {% if user.is_superuser %}
                                     <button type="button" class="button button-danger" popovertarget="delete-project-{{ project.id }}">
                                         Delete

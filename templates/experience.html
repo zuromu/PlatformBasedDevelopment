@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+
 {% block meta %}
     <title>Experience - {{ name }}</title>
 {% endblock meta %}
+
 {% block content %}
     <main>
         <section class="experience-section" id="experience">
@@ -9,15 +11,17 @@
                 <p class="section-kicker">My journey so far</p>
                 <div class="experience-header">
                     <h1>Experience</h1>
-                    <a href="{% url 'main:add_experience' %}"
-                       class="button experience-add-button">
-                        <span aria-hidden="true">+</span>
-                        Add Experience
-                    </a>
+                    
+                    <!-- Only superuser can add -->
+                    {% if user.is_superuser %}
+                        <a href="{% url 'main:add_experience' %}" class="button experience-add-button">
+                            <span aria-hidden="true">+</span>
+                            Add Experience
+                        </a>
+                    {% endif %}
                 </div>
-                <form method="get"
-                      action="{% url 'main:show_experience' %}"
-                      class="experience-search">
+                
+                <form method="get" action="{% url 'main:show_experience' %}" class="experience-search">
                     <input type="search"
                            name="title"
                            value="{{ title_query }}"
@@ -25,8 +29,8 @@
                            class="experience-search__input"
                            aria-label="Search by experience name">
                     <button type="submit" class="button">Search</button>
-
                 </form>
+
                 <div class="experience-grid projects-grid">
                     {% for experience in experience_list %}
                         <article class="experience-card">
@@ -36,17 +40,29 @@
                                      class="experience-image"
                                      loading="lazy"
                                      decoding="async">
-
                             {% endif %}
                             <h2>{{ experience.title }}</h2>
                             <span class="experience-category">{{ experience.category }}</span>
                             <p class="experience-description">{{ experience.description }}</p>
+                            
                             <div class="experience-card-actions">
                                 <div class="experience-actions">
                                     {% if experience.experience_url %}
-                                        <a href="{{ experience.experience_url }}" class="button">See Experience</a>
+                                        <a href="{{ experience.experience_url }}" class="button button-secondary">See Experience</a>
                                     {% endif %}
-                                    {% include "components/experience_delete_modal.html" with experience=experience %}
+                                    
+                                    {% if user.is_superuser or is_editor %}
+                                        <a href="{% url 'main:update_experience' experience.id %}" class="button button-secondary">Edit</a>
+                                    {% endif %}
+
+                                    {% include "components/experience_star.html" with experience=experience %}
+
+                                    {% if user.is_superuser %}
+                                        <button type="button" class="button button-danger" popovertarget="delete-experience-{{ experience.id }}">
+                                            Delete
+                                        </button>
+                                        {% include "components/experience_delete_modal.html" with experience=experience %}
+                                    {% endif %}
                                 </div>
                             </div>
                         </article>
