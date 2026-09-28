@@ -115,3 +115,7 @@ I barely used AI for this assignment since the Django MVT flow is starting to ma
 - **Prompt Strategy:** I only used it to help me figure out the HTML/CSS structure for the popup delete confirmation modal and the notification popups.
 - **Limitations & Manual Fixes:** I didn't use AI for any of the Python backend logic this time. I manually handled writing the `ModelForm`, creating the CRUD views, writing the JSON serializer endpoint, and refactoring all my HTML files to extend the `base.html` skeleton template.
 - **AI Chat Log:** https://share.gemini.google/tlReTHDvUMlX 
+
+
+
+

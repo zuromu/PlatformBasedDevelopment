@@ -12,9 +12,11 @@
                 
                 <div class="project-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h1 style="margin: 0;">Projects</h1>
+                    {% if user.is_superuser %}
                     <a href="{% url 'main:create_project' %}" class="button">
                         + Add Project
                     </a>
+                    {% endif %}
                 </div>
 
                 <div class="experience-grid project-grid">
@@ -34,12 +36,14 @@
                                         <a href="{{ project.github_url }}" target="_blank" class="button button-secondary">GitHub</a>
                                     {% endif %}
                                     <a href="{% url 'main:update_project' project.id %}" class="button button-secondary">Edit</a>
-                                    
+
+                                    {% include "components/project_star.html" with project=project %}
+                                    {% if user.is_superuser %}
                                     <button type="button" class="button button-danger" popovertarget="delete-project-{{ project.id }}">
                                         Delete
                                     </button>
-                                    
                                     {% include "components/project_delete_modal.html" with project=project %}
+                                    {% endif %}
                                 </div>
                             </div>
                         </article>

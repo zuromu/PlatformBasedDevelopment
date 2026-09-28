@@ -1,4 +1,5 @@
 import uuid
+from django.contrib.auth.models import User
 from django.db import models
 
 class Experience(models.Model):
@@ -36,6 +37,9 @@ class Project(models.Model):
     tech_stack = models.CharField(max_length=255) 
     description = models.TextField()
     github_url = models.URLField(blank=True, null=True)
+    starred_by = models.ManyToManyField(
+        User, related_name="starred_projects", blank=True
+    )
     date_added = models.DateField(auto_now_add=True)
 
     def __str__(self):
