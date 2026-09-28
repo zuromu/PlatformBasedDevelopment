@@ -56,6 +56,14 @@
 - [x] Added a delete button with a pop-up confirmation modal so I don't accidentally delete stuff.
 - [x] Built a JSON API endpoint (`/api/projects/`) using Django serializers to serve my data.
 
+**Week 4: Authentication, Sessions, and Authorization**
+- [x] Implemented a `UserCreationForm` and `AuthenticationForm` for user registration and login.
+- [x] Configured session cookies (``last_login`) to track when users log in and out.
+- [x] Secured state-changing forms with `{% csrf_token %}` to prevent unauthorized request forgery.
+- [x] Created an `Editor` group in Django Admin and applied role-based access control (Superuser, Editor, Regular, Anonymous) to my `views.py`.
+- [x] Used `{% if %}` template tags to conditionally hide Add, Edit, and Delete buttons based on user permissions.
+- [x] Implemented a ManyToMany `starred_by` field so authenticated users can star their favorite experiences and projects.
+
 
 
 ### Assignment 1
@@ -117,5 +125,13 @@ I barely used AI for this assignment since the Django MVT flow is starting to ma
 - **AI Chat Log:** https://share.gemini.google/tlReTHDvUMlX 
 
 
+### Assignment 4
+(Note: Reflective questions were removed for this week's assignment).
+
+**AI Usage Disclosure:**
+I used Gemini to act as a pair programmer while implementing my role-based access control.
+- **Prompt Strategy:** I provided my existing MVT codebase and asked for the cleanest way to enforce permission checks across four different roles (Superuser, Editor, Regular User, Anonymous).
+- **Limitations & Manual Fixes:** The AI provided the backend logic and the `is_editor` helper function, but I had to manually integrate the logic into my custom views and apply the conditional `{% if %}` checks within my custom neo-brutalist HTML design system, as well as debugging case-sensitivity with `name__iexact`.
+- **AI Chat Log:** https://share.gemini.google/4HlIQO7ZEdpj
 
 
