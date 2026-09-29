@@ -879,7 +879,7 @@ h1, .brand {
     padding: 1.5rem;
     background: var(--paper);
     border: 1px solid var(--line);
-    border-radius: var(--radius);
+    border-radius: var(--radius-others);
     box-shadow: 0 1rem 3rem rgba(28, 25, 23, 0.22);
 }
 
@@ -919,7 +919,7 @@ h1, .brand {
         width: 100%;
         max-height: 90vh;
         padding: 1.25rem;
-        border-radius: var(--radius) var(--radius) 0 0;
+        border-radius: var(--radius-others) var(--radius-others) 0 0;
     }
 
     .project-form-modal__actions {
