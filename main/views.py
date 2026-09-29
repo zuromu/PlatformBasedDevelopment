@@ -28,21 +28,6 @@ def show_main(request):
 
 #Experience
 @login_required(login_url="/login/")
-def add_experience(request):
-    if not request.user.is_superuser:
-        raise PermissionDenied
-        
-    form = ExperienceForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "New Experience Added!")
-        return redirect("main:show_experience")
-
-    context = {"name": "Ahmad Hoesin", "form": form}
-    return render(request, "experience_form.html", context)
-
-
-@login_required(login_url="/login/")
 def update_experience(request, experience_id):
     if not (request.user.is_superuser or is_editor(request.user)):
         raise PermissionDenied
