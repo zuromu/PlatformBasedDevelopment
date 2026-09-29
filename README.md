@@ -58,11 +58,19 @@
 
 **Week 4: Authentication, Sessions, and Authorization**
 - [x] Implemented a `UserCreationForm` and `AuthenticationForm` for user registration and login.
-- [x] Configured session cookies (``last_login`) to track when users log in and out.
+- [x] Configured session cookies (`last_login`) to track when users log in and out.
 - [x] Secured state-changing forms with `{% csrf_token %}` to prevent unauthorized request forgery.
 - [x] Created an `Editor` group in Django Admin and applied role-based access control (Superuser, Editor, Regular, Anonymous) to my `views.py`.
 - [x] Used `{% if %}` template tags to conditionally hide Add, Edit, and Delete buttons based on user permissions.
 - [x] Implemented a ManyToMany `starred_by` field so authenticated users can star their favorite experiences and projects.
+
+**Week 5: Web Interactivity with JavaScript**
+- [x] Converted the Experience and Project page to use AJAX, so it loads data without reloading the whole page.
+- [x] Built a custom JSON endpoint with `JsonResponse` to feed data to the frontend.
+- [x] Added search debouncing so the API doesn't get spammed with requests while typing.
+- [x] Put the Add Experience/Project form inside a popover modal and wired it up to submit using the Fetch API.
+- [x] Added custom toast notifications to show success and error messages cleanly.
+- [x] Protected the site against XSS attacks using `strip_tags` in the backend and a custom `escapeHtml` function in JavaScript.
 
 
 
@@ -135,3 +143,19 @@ I used Gemini to act as a pair programmer while implementing my role-based acces
 - **AI Chat Log:** https://share.gemini.google/4HlIQO7ZEdpj
 
 
+
+### Assignment 5
+**1. Explain what debouncing is and why this technique is important to implement in a search feature that uses AJAX.**
+Debouncing is basically adding a slight delay so a function doesn't trigger a million times in a row. Without it, my AJAX search would spam the server with a new HTTP request for every single letter I type. By adding a 300ms delay, the code waits until I actually pause typing before sending the request. It saves server load and stops the results from glitching out if a slower, older request finishes after a newer one.
+
+
+**2. Explain the purpose of using `await` when we use `fetch()`. What would happen if we did not use `await?`**
+The `fetch()` function is asynchronous, meaning it runs in the background and immediately returns a "Promise" instead of the actual data. Putting `await` in front of it tells JavaScript to literally pause and wait for the server to reply before moving to the next line. If I didn't use `await`, the code would just keep executing, try to render the page before the data even arrived, and crash because my variable would hold an empty Promise object instead of the real JSON data.
+
+**3. Explain what a Cross-Site Scripting (XSS) attack is and why data displayed through AJAX/JavaScript is more vulnerable to this attack than data displayed directly through a Django template.**
+XSS happens when someone sneaks malicious JavaScript into your site's data (like submitting `<script>alert('hacked')</script>` as a project title) so it runs on other users' screens. With standard Django templates, Django automatically escapes HTML for us, rendering it safe. But with AJAX, we grab raw JSON and manually shove it into the DOM using JavaScript. The browser just blindly trusts and executes any scripts it finds in that raw data. That's why I had to write a custom `escapeHtml` function to sanitize the data before putting it on the screen.
+
+**AI Usage Disclosure:**
+I didn't use AI for this assignment.
+- **Prompt Strategy:** None
+- **Limitations & Manual Fixes:** I just followed the Tutorial 5 steps and manually adapted the AJAX, debouncing, modal, and XSS protection logic for my custom `Experience` page. I also had to manually clean up my old URLs and views to make sure my Editor role access checks from last week still worked flawlessly with the new JSON endpoints. No chat log needed this week.
