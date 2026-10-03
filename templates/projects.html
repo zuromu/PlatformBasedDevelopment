@@ -59,7 +59,7 @@
     {% endif %}
 
     <script>
-    const IS_EDITOR = "{{ request.is_editor|yesno:'true,false' }}" === "true";
+    const IS_EDITOR = "{{ is_editor|yesno:'true,false' }}" === "true";
     // Configuration
     const BASE_PROJECTS_ENDPOINT = "{% url 'main:get_projects_json' %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
