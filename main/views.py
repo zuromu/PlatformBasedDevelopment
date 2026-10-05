@@ -279,3 +279,20 @@ def edit_project_ajax(request, id):
         form.save()
         return JsonResponse({"message": "Project updated successfully!"}, status=200)
     return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+@require_POST
+def edit_experience_ajax(request, id):
+    if not (request.user.is_superuser or is_editor(request.user)):
+        return JsonResponse({"message": "You do not have permission to edit this experience."}, status=403)
+
+    try:
+        experience = Experience.objects.get(pk=id)
+    except Experience.DoesNotExist:
+        return JsonResponse({"error": "Experience not found"}, status=404)
+        
+    form = ExperienceForm(request.POST, instance=experience)
+    if form.is_valid():
+        form.save()
+        return JsonResponse({"message": "Experience updated successfully!"}, status=200)
+        
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
