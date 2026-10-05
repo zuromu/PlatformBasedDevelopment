@@ -54,7 +54,7 @@
         </section>
     </main>
 
-    {% if user.is_superuser %}
+    {% if user.is_superuser or is_editor %}
         {% include "components/project_form_modal.html" %}
     {% endif %}
 
