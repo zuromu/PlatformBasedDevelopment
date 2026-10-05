@@ -43,6 +43,10 @@
         {% include "components/experience_form_modal.html" %}
     {% endif %}
 
+    {% if user.is_superuser %}
+        {% include "components/experience_delete_modal.html" %}
+    {% endif %}
+
     <script>
     const BASE_EXP_ENDPOINT = "{% url 'main:get_experience_json' %}";    
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
@@ -103,11 +107,15 @@
             : '';
 
         const deleteUrl = "{% url 'main:delete_experience' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', pk);
-        const deleteHtml = IS_SUPERUSER ? `
-            <form method="post" action="${deleteUrl}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="button button-danger" onclick="return confirm('Are you sure you want to delete this?');">Delete</button>
-            </form>` : '';
+        const deleteHtml = IS_SUPERUSER 
+            ? `<p class="experience-status">
+                   <button type="button" 
+                           class="button button-danger" 
+                           onclick="openDeleteModal('${pk}', '${escapeHtml(exp.title)}')">
+                       Delete Experience
+                   </button>
+               </p>`
+            : '';
 
         const starUrl = "{% url 'main:toggle_star_experience' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', pk);
         const starClass = exp.is_starred ? " is-starred" : "";
@@ -238,6 +246,19 @@
                 modalSubmitBtn.disabled = false;
             }
         });
+    }
+
+    function openDeleteModal(experienceId, experienceTitle) {
+        const deleteModal = document.getElementById('global-experience-delete-modal');
+        if (!deleteModal) return;
+
+        document.getElementById('delete-modal-experience-name').textContent = experienceTitle;
+
+        const form = document.getElementById('delete-modal-form');
+        const deleteUrlBase = "{% url 'main:delete_experience' '00000000-0000-0000-0000-000000000000' %}";
+        form.action = deleteUrlBase.replace('00000000-0000-0000-0000-000000000000', experienceId);
+
+        deleteModal.showPopover();
     }
 
     // Start
