@@ -23,6 +23,7 @@
               action="{% url 'main:create_project_ajax' %}"
               class="project-form">
             {% csrf_token %}
+            <input type="hidden" id="project-id" name="id">
             {% for field in form %}
                 <div class="form-group">
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>

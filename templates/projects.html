@@ -64,6 +64,7 @@
     const BASE_PROJECTS_ENDPOINT = "{% url 'main:get_projects_json' %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
     let projectsAbortController;
+    let allProjectsData = [];
 
     // DOM elements
     const loadingState = document.getElementById('loading');
@@ -110,14 +111,12 @@
             ? `<a href="${escapeHtml(project.github_url)}" class="button">View Project</a>`
             : '';
 
-        // A dummy UUID used as a placeholder to be replaced with the real ID from the JSON data
-        const deleteUrl = "{% url 'main:delete_project' '00000000-0000-0000-0000-000000000000' %}"
-            .replace('00000000-0000-0000-0000-000000000000', projectId);
-        const starUrl = "{% url 'main:toggle_star_project' '00000000-0000-0000-0000-000000000000' %}"
-            .replace('00000000-0000-0000-0000-000000000000', projectId);
+        const deleteUrl = "{% url 'main:delete_project' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', projectId);
+        const starUrl = "{% url 'main:toggle_star_project' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', projectId);
 
-        const updateUrl = "{% url 'main:update_project' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', projectId);
-        const editHtml = (IS_SUPERUSER || IS_EDITOR) ? `<a href="${updateUrl}" class="button button-secondary">Edit</a>` : '';
+        const editHtml = (IS_SUPERUSER || IS_EDITOR) 
+            ? `<button type="button" class="button button-secondary" onclick="openEditModal('${projectId}')">Edit</button>` 
+            : '';
         const deleteHtml = IS_SUPERUSER 
             ? `<form method="post" action="${deleteUrl}" style="display:inline;">
                 {% csrf_token %}
@@ -141,7 +140,7 @@
                 <div class="project-actions">
                     ${urlHtml}
                     ${editHtml}
-                    
+
                     <form method="post" action="${starUrl}" class="star-form">
                         {% csrf_token %}
                         <button type="submit" 
@@ -157,7 +156,7 @@
                 </div>
             </div>
         `;
-
+        
         articleElement.innerHTML = completeCardHtml;
         return articleElement;
     }
@@ -180,6 +179,7 @@
             if (!response.ok) throw new Error('Failed to fetch data');
 
             const projectData = await response.json();
+            allProjectsData = projectData; 
 
             if (projectData.length === 0) {
                 displayPageSection({ showEmpty: true });
@@ -220,9 +220,8 @@
         document.getElementById("add-project-modal").hidePopover();
     }
 
-        const CREATE_PROJECT_ENDPOINT = "{% url 'main:create_project_ajax' %}";
-    const projectForm = document.getElementById('project-form');
-
+        
+    
     // Read a cookie value, used to get the CSRF token
     function getCookie(name) {
         let cookieValue = null;
@@ -239,45 +238,79 @@
         return cookieValue;
     }
 
-    // Send the form data to the server
-    async function addProject(event) {
-        event.preventDefault();
+    const CREATE_PROJECT_ENDPOINT = "{% url 'main:create_project_ajax' %}";
+    const projectForm = document.getElementById('project-form');
+    const modalTitle = document.getElementById('add-project-modal-title');
+    const modalSubmitBtn = projectForm ? projectForm.querySelector('button[type="submit"]') : null;
+    let isEditMode = false;
 
-        const submitButton = projectForm.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
+    document.querySelector('.project-add-button')?.addEventListener('click', () => {
+        isEditMode = false;
+        projectForm.reset();
+        projectForm.action = CREATE_PROJECT_ENDPOINT;
+        document.getElementById('project-id').value = '';
+        if (modalTitle) modalTitle.textContent = "Add a New Project";
+        if (modalSubmitBtn) modalSubmitBtn.textContent = "Add Project";
+    });
 
-        try {
-            const response = await fetch(CREATE_PROJECT_ENDPOINT, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken') },
-                body: new FormData(projectForm),
-            });
-            const result = await response.json().catch(() => ({}));
+    
 
-            if (response.ok) {
-                projectForm.reset();
-                closeProjectModal();
-                showToast('Success', 'New project added successfully!', 'success');
-                fetchProjects(searchInput.value.trim());
-            } else {
-                const errorMessages = result.errors
-                    ? Object.values(result.errors).flat().map(error => error.message)
-                    : [result.message || `Something went wrong (status ${response.status}).`];
-                showToast('Failed to add project', errorMessages.join(' '), 'error');
-            }
-        } catch (error) {
-            console.error('Error adding project:', error);
-            showToast('Failed to add project', 'Could not reach the server. Please try again.', 'error');
-        } finally {
-            submitButton.disabled = false;
-        }
+    function openEditModal(projectId) {
+        const item = allProjectsData.find(p => p.pk === projectId);
+        if (!item) return;
+        
+        const project = item.fields;
+        isEditMode = true;
+        
+        document.getElementById('project-id').value = projectId;
+        document.getElementById('id_name').value = project.name;
+        document.getElementById('id_tech_stack').value = project.tech_stack;
+        document.getElementById('id_description').value = project.description;
+        document.getElementById('id_github_url').value = project.github_url || '';
+
+        if (modalTitle) modalTitle.textContent = "Edit Project";
+        if (modalSubmitBtn) modalSubmitBtn.textContent = "Save Changes";
+        
+        const editUrl = "{% url 'main:edit_project_ajax' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', projectId);
+        projectForm.action = editUrl;
+
+        document.getElementById('add-project-modal').showPopover();
     }
 
     if (projectForm) {
-        projectForm.addEventListener('submit', addProject);
+        projectForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            modalSubmitBtn.disabled = true;
+
+            try {
+                const response = await fetch(projectForm.action, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                    body: new FormData(projectForm),
+                });
+                const result = await response.json().catch(() => ({}));
+
+                if (response.ok) {
+                    closeProjectModal();
+                    showToast('Success', isEditMode ? 'Project updated!' : 'New project added!', 'success');
+                    fetchProjects(searchInput.value.trim());
+                } else {
+                    const errorMessages = result.errors
+                        ? Object.values(result.errors).flat().map(error => error.message)
+                        : [result.message || `Something went wrong (status ${response.status}).`];
+                    showToast(isEditMode ? 'Failed to update project' : 'Failed to add project', errorMessages.join(' '), 'error');
+                }
+            } catch (error) {
+                console.error('Error saving project:', error);
+                showToast('Error', 'Could not reach the server. Please try again.', 'error');
+            } finally {
+                modalSubmitBtn.disabled = false;
+            }
+        });
     }
 
-    // Start the application
+    // Start
     fetchProjects(searchInput.value.trim());
     </script>
+
 {% endblock content %}
