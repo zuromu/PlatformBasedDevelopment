@@ -37,8 +37,8 @@ class MainTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "experience.html")
-        self.assertContains(response, self.experience.title)
-        self.assertContains(response, self.experience.description)
+        self.assertContains(response, 'id="grid"')
+        self.assertContains(response, 'id="experience-search-form"')
         self.assertContains(response, f'href="{reverse("main:show_main")}"')
 
     def test_empty_experience_page(self):
@@ -69,16 +69,14 @@ class ProjectTest(TestCase):
         self.assertEqual(str(self.project), "Wanderer's Koperasi Quest")
         self.assertEqual(self.project.tech_stack, "JavaScript, HTML, CSS, Phaser")
 
-    def test_projects_page_is_accessible_and_renders_data(self):
+    def test_projects_page_is_accessible(self):
         response = self.client.get(reverse("main:show_projects"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "projects.html")
-        self.assertContains(response, escape("Wanderer's Koperasi Quest"))
-        self.assertContains(response, "JavaScript, HTML, CSS, Phaser")
-        self.assertContains(response, "RPG Edukasi Keuangan yang mengajarkan konsep koperasi Indonesia lewat petualangan.")
-        self.assertContains(response, "https://github.com/zuromu/Wanderers-Koperasi")
+        self.assertContains(response, 'id="grid"')
+        self.assertContains(response, 'id="project-search-form"')
         
     def test_empty_projects_page(self):
         Project.objects.all().delete()
         response = self.client.get(reverse("main:show_projects"))
-        self.assertContains(response, "No projects have been added yet.")
+        self.assertContains(response, "No projects have been added or found yet.")
