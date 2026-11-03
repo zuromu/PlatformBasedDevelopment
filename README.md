@@ -72,6 +72,12 @@
 - [x] Added custom toast notifications to show success and error messages cleanly.
 - [x] Protected the site against XSS attacks using `strip_tags` in the backend and a custom `escapeHtml` function in JavaScript.
 
+**Week 6: Django REST Framework**
+- [x] Installed DRF and built a Projects API (`/api/v1/projects/`) with `ProjectSerializer`, `IsPortfolioOwnerOrReadOnly`, and function-based `@api_view` views.
+- [x] Applied the same pattern to Experience: `ExperienceSerializer`, `IsPortfolioOwnerOrEditorOrReadOnly`, and list/detail/star endpoints under `/api/v1/experience/`.
+- [x] Rebuilt the Experience page to display, search, add, edit (PATCH), star, and delete through the API, with API errors shown in toasts.
+- [x] Wrote `APITestCase` tests covering all four roles, validation, stars, and CSRF enforcement with `APIClient(enforce_csrf_checks=True)`.
+
 
 
 ### Assignment 1
@@ -159,3 +165,25 @@ XSS happens when someone sneaks malicious JavaScript into your site's data (like
 I didn't use AI for this assignment.
 - **Prompt Strategy:** None
 - **Limitations & Manual Fixes:** I just followed the Tutorial 5 steps and manually adapted the AJAX, debouncing, modal, and XSS protection logic for my custom `Experience` page. I also had to manually clean up my old URLs and views to make sure my Editor role access checks from last week still worked flawlessly with the new JSON endpoints. No chat log needed this week.
+
+
+### Assignment 6
+
+**1. Explain what REST means and why returning JSON alone isn't enough to call an API RESTful. Also explain the difference between `PUT` and `PATCH`, with an example of when each should be used.**
+REST is basically an architectural style for designing web APIs, not a library or a data format. The idea is that data is treated as resources with their own URLs (like `/api/v1/experience/<uuid>/`), the HTTP method says what you want to do (GET reads, POST creates, PUT/PATCH updates, DELETE removes), and the client and server just swap representations of that data. Returning JSON alone doesn't make it RESTful because the format is only one small piece. My Tutorial 05 endpoints returned JSON too, but they had the action baked into the URL (`/projects/add-ajax/`, `/projects/<id>/delete/`) and everything was a POST. The new API does `POST /api/v1/experience/` to create and `DELETE /api/v1/experience/<uuid>/` to delete, so the URL is the thing and the method is the action.
+For `PUT` vs `PATCH`: `PUT` sends a full replacement of the object, so every required field has to be there. `PATCH` only sends the fields that need to change and leaves the rest alone. In my tests, a `PUT` with only a title got a 400 because the description was missing, while a `PATCH` with only a title worked and kept the old description. So I'd use `PUT` when replacing a whole record (like submitting the full edit form), and `PATCH` for a small fix like correcting a typo in the title.
+
+**2. Explain the role of a serializer in Django REST Framework. What are its advantages over manually assembling a dictionary with `JsonResponse` as in Tutorial 05?**
+A serializer is the translator between my Django model objects and plain data. Going out, it turns an `Experience` object into data that DRF's renderer can turn into JSON. Coming in, it checks the data the client sent and turns it into something ready to save. In Tutorial 05, `get_experience_json` looped through every object and built a dictionary by hand, field by field, with the star logic mixed in. And the validation lived in a totally separate place (`ExperienceForm`), so I had to remember to keep both in sync. With `ExperienceSerializer`, one class handles reading, creating, and updating. The `fields` list decides exactly what gets exposed (so no emails or password hashes), `read_only_fields` stops a client from forging `star_count`, and `validate_title` does the `strip_tags` cleaning in the same spot. If I add a new model field later, it's one line instead of hunting through a loop.
+
+**3. Explain the difference between authentication and authorization in Django REST Framework. Why must access rights be checked with a permission class on the server, rather than only by hiding a button in the template?**
+Authentication answers "who are you?" and authorization answers "what are you allowed to do?". In my API, `SessionAuthentication` reads the session cookie from my existing login and sets `request.user`. Then the permission class, `IsPortfolioOwnerOrEditorOrReadOnly`, looks at that user and decides if the request can keep going. Hiding a button in the template is just a UI courtesy, not security. Anyone can open DevTools, or use `fetch` or curl, and send a `DELETE` straight to `/api/v1/experience/<uuid>/` without ever seeing my button. Only the server can actually refuse that. My tests prove it: a regular user trying to `DELETE` gets a 403 and the database still has the record.
+
+**4. Explain why requests that change data still need a CSRF token when an API uses `SessionAuthentication`. Why isn't a test using `force_authenticate` enough to prove that CSRF protection works?**
+With `SessionAuthentication`, the login lives in a cookie, and the browser attaches that cookie automatically to every request to my site, even ones triggered by a different malicious website. So without a CSRF token, an evil page could make a logged-in owner's browser fire a `DELETE` without them knowing. The `X-CSRFToken` header fixes that, because the token has to match what Django expects and another site can't read it. That's why my `fetch()` calls for POST, PATCH, and DELETE all send it. `force_authenticate` isn't enough because it sets `request.user` directly and skips the real authentication step, so CSRF never even gets checked and the test would pass either way. To actually prove it, I used `APIClient(enforce_csrf_checks=True)` with a real `.login()`, and confirmed a write without the token gets a 403 and changes nothing.
+
+**AI Usage Disclosure:**
+I used Claude for this assignment, and I used it more than I did for Assignment 5.
+- **Prompt Strategy:** I gave it the Tutorial 07 and Assignment 6 pages and my repo, and asked it to adapt the DRF pattern to my own models (`Project` for the tutorial, `Experience` for the assignment). I also asked it conceptual questions about things I didn't get, like how permission classes run and why `force_authenticate` skips CSRF, and got it to explain debugging errors. It drafted the serializer, permission, API view, test, and JavaScript code, and it drafted the wording of these reflective answers to match my earlier README style.
+- **Limitations & Manual Fixes:** The AI's first version put the Editor permission on the tutorial's Projects API, but Tutorial 07 says Projects are owner-only and the Editor rules belong to my own section, so I changed that. Its code also assumed the tutorial's field names (`title`, `project_url`), but my `Project` model uses `name` and `github_url`, so everything had to be matched to my models. I also had to fix my old tests, because they expected data in the HTML even though the pages have been rendered by JavaScript since Assignment 5. I ran everything myself and tested each role (owner, Editor, regular user, visitor) in the browser.
+- **AI Chat Log:** https://claude.ai/share/43c96126-b34d-46fb-ab83-5276bfb17129
