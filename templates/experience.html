@@ -47,15 +47,16 @@
         {% include "components/experience_delete_modal.html" %}
     {% endif %}
 
+    {% csrf_token %}
     <script>
-    const BASE_EXP_ENDPOINT = "{% url 'main:get_experience_json' %}";    
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
     const IS_EDITOR = "{{ is_editor|yesno:'true,false' }}" === "true";
-    
-    let abortController;
-    let allExperiencesData = [];
+    const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
+    const BASE_EXP_ENDPOINT = "{% url 'api:experience-list' %}";
+    const DETAIL_EXP_ENDPOINT = "{% url 'api:experience-detail' '00000000-0000-0000-0000-000000000000' %}";
+    const STAR_EXP_ENDPOINT = "{% url 'api:experience-star' '00000000-0000-0000-0000-000000000000' %}";
+    const LOGIN_URL = "{% url 'main:login' %}";
     const SEARCH_DELAY = 300;
-    let debounceTimer;
 
     const loadingState = document.getElementById('loading');
     const errorState = document.getElementById('error');
@@ -63,6 +64,36 @@
     const gridContainer = document.getElementById('grid');
     const searchForm = document.getElementById('experience-search-form');
     const searchInput = document.getElementById('search-input');
+    const expForm = document.getElementById('experience-form');
+    const expModal = document.getElementById('add-experience-modal');
+    const expIdInput = document.getElementById('experience-id');
+    const modalTitle = document.getElementById('add-exp-modal-title');
+    const modalSubmitBtn = expForm ? expForm.querySelector('button[type="submit"]') : null;
+    const deleteModal = document.getElementById('global-experience-delete-modal');
+    const deleteForm = document.getElementById('delete-modal-form');
+    const deleteNameLabel = document.getElementById('delete-modal-experience-name');
+
+    const experiencesById = new Map();
+    let abortController;
+    let debounceTimer;
+    let editingId = null;
+    let pendingDeleteId = null;
+
+    function getCookie(name) {
+        const prefix = `${name}=`;
+        const cookie = document.cookie.split(';').map(value => value.trim())
+            .find(value => value.startsWith(prefix));
+        return cookie ? decodeURIComponent(cookie.slice(prefix.length)) : null;
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+    }
+
+    function endpoint(pattern, id) {
+        return pattern.replace('00000000-0000-0000-0000-000000000000', id);
+    }
 
     function displayState({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
         loadingState.classList.toggle('hide', !showLoading);
@@ -71,197 +102,196 @@
         gridContainer.classList.toggle('hide', !showGrid);
     }
 
-    function escapeHtml(value) {
-        return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
-    }
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-    function closeExpModal() {
-        document.getElementById("add-experience-modal").hidePopover();
-    }
-
-    function buildCard(item) {
-        const exp = item.fields;
-        const pk = item.pk;
+    function buildCard(exp) {
         const article = document.createElement('article');
         article.className = 'experience-card';
+        const id = escapeHtml(exp.id);
 
-        const imgHtml = exp.thumbnail ? `<img src="${escapeHtml(exp.thumbnail)}" alt="${escapeHtml(exp.title)} image" class="experience-image" loading="lazy">` : '';
+        const img = exp.thumbnail
+            ? `<img src="${escapeHtml(exp.thumbnail)}" alt="${escapeHtml(exp.title)} image" class="experience-image" loading="lazy">` : '';
+        const edit = (IS_SUPERUSER || IS_EDITOR)
+            ? `<button type="button" class="button button-secondary" data-action="edit" data-id="${id}">Edit</button>` : '';
+        const starTitle = exp.star_count > 0 ? `Starred by ${escapeHtml(exp.starred_by_names)}` : 'Be the first to star';
+        const starLabel = exp.is_starred ? 'Unstar' : 'Star';
+        const star = IS_AUTHENTICATED
+            ? `<button type="button" class="button button-star${exp.is_starred ? ' is-starred' : ''}"
+                   data-action="star" data-id="${id}" title="${starTitle}">
+                   <span aria-hidden="true">★</span> ${starLabel} <span class="star-count">${exp.star_count}</span></button>`
+            : `<a href="${LOGIN_URL}" class="button button-star" title="Log in to star">
+                   <span aria-hidden="true">★</span> Login to star <span class="star-count">${exp.star_count}</span></a>`;
+        const remove = IS_SUPERUSER
+            ? `<p class="experience-status"><button type="button" class="button button-danger"
+                   data-action="delete" data-id="${id}">Delete Experience</button></p>` : '';
 
-        const editHtml = (IS_SUPERUSER || IS_EDITOR) 
-            ? `<button type="button" class="button button-secondary" onclick="openEditModal('${pk}')">Edit</button>` 
-            : '';
-
-        const deleteUrl = "{% url 'main:delete_experience' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', pk);
-        const deleteHtml = IS_SUPERUSER 
-            ? `<p class="experience-status">
-                   <button type="button" 
-                           class="button button-danger" 
-                           onclick="openDeleteModal('${pk}', '${escapeHtml(exp.title)}')">
-                       Delete Experience
-                   </button>
-               </p>`
-            : '';
-
-        const starUrl = "{% url 'main:toggle_star_experience' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', pk);
-        const starClass = exp.is_starred ? " is-starred" : "";
-        const starText = exp.is_starred ? "Unstar" : "Star";
-        const starTitle = exp.star_count > 0 ? `Starred by ${escapeHtml(exp.starred_by_names)}` : "Be the first to star";
-
-        article.innerHTML = `
-            ${imgHtml}
+        article.innerHTML = `${img}
             <h2>${escapeHtml(exp.title)}</h2>
             <span class="experience-category">${escapeHtml(exp.category)}</span>
             <p class="experience-description">${escapeHtml(exp.description)}</p>
             <div class="experience-card-actions">
                 <div class="experience-actions" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
-                    ${editHtml}
-                    <form method="post" action="${starUrl}" class="star-form">
-                        {% csrf_token %}
-                        <button type="submit" class="button button-star${starClass}" title="${starTitle}">
-                            <span aria-hidden="true">★</span> ${starText} <span class="star-count">${exp.star_count}</span>
-                        </button>
-                    </form>
-                    ${deleteHtml}
+                    ${edit}${star}${remove}
                 </div>
-            </div>
-        `;
+            </div>`;
         return article;
     }
 
-    async function fetchExperiences(query = "") {
+    async function fetchExperiences(query = '') {
         if (abortController) abortController.abort();
         abortController = new AbortController();
-
         try {
             displayState({ showLoading: true });
-            const url = query ? `${BASE_EXP_ENDPOINT}?title=${encodeURIComponent(query)}` : BASE_EXP_ENDPOINT;
-            const res = await fetch(url, { headers: { 'Accept': 'application/json' }, signal: abortController.signal });
-            
-            if (!res.ok) throw new Error('Fetch failed');
+            const url = new URL(BASE_EXP_ENDPOINT, window.location.origin);
+            if (query) url.searchParams.set('title', query);
+            const res = await fetch(url, {
+                headers: { Accept: 'application/json' },
+                signal: abortController.signal,
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
-            
-            allExperiencesData = data; 
-
-            if (data.length === 0) {
-                displayState({ showEmpty: true });
-            } else {
-                gridContainer.innerHTML = '';
-                data.forEach(item => gridContainer.appendChild(buildCard(item)));
-                displayState({ showGrid: true });
-            }
+            experiencesById.clear();
+            data.forEach(exp => experiencesById.set(exp.id, exp));
+            gridContainer.replaceChildren(...data.map(buildCard));
+            displayState({ showGrid: data.length > 0, showEmpty: data.length === 0 });
         } catch (err) {
-            if (err.name !== 'AbortError') displayState({ showError: true });
+            if (err.name === 'AbortError') return;
+            console.error(err);
+            displayState({ showError: true });
         }
     }
 
-    function runSearch() { fetchExperiences(searchInput.value.trim()); }
+    function runSearch() { return fetchExperiences(searchInput.value.trim()); }
 
-    searchInput.addEventListener("input", () => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(runSearch, SEARCH_DELAY);
-    });
-
-    searchForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        clearTimeout(debounceTimer);
-        runSearch();
-    });
-
-    const CREATE_EXP_ENDPOINT = "{% url 'main:create_experience_ajax' %}";
-    const expForm = document.getElementById('experience-form');
-    const modalTitle = document.getElementById('add-experience-modal-title');
-    const modalSubmitBtn = expForm ? expForm.querySelector('button[type="submit"]') : null;
-    let isEditMode = false;
-
-    document.querySelector('.experience-add-button')?.addEventListener('click', () => {
-        isEditMode = false;
-        expForm.reset();
-        expForm.action = CREATE_EXP_ENDPOINT;
-        document.getElementById('experience-id').value = '';
-        if (modalTitle) modalTitle.textContent = "Add a New Experience";
-        if (modalSubmitBtn) modalSubmitBtn.textContent = "Add Experience";
-    });
-
-    window.openEditModal = function(experienceId) {
-        const item = allExperiencesData.find(e => e.pk === experienceId);
-        if (!item) return;
-        
-        const exp = item.fields;
-        isEditMode = true;
-        
-        document.getElementById('experience-id').value = experienceId;
-        if(document.getElementById('id_title')) document.getElementById('id_title').value = exp.title;
-        if(document.getElementById('id_category')) document.getElementById('id_category').value = exp.category;
-        if(document.getElementById('id_description')) document.getElementById('id_description').value = exp.description;
-        if(document.getElementById('id_thumbnail')) document.getElementById('id_thumbnail').value = exp.thumbnail || '';
-
-        if (modalTitle) modalTitle.textContent = "Edit Experience";
-        if (modalSubmitBtn) modalSubmitBtn.textContent = "Save Changes";
-        
-        const editUrl = "{% url 'main:edit_experience_ajax' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', experienceId);
-        expForm.action = editUrl;
-
-        document.getElementById('add-experience-modal').showPopover();
+    function apiErrorMessage(data, status) {
+        const messages = Object.values(data).flat().filter(value => typeof value === 'string');
+        return messages.join(' ') || `Request failed (HTTP ${status}).`;
     }
 
-    if (expForm) {
-        expForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            modalSubmitBtn.disabled = true;
+    async function writeExperience(url, method, payload) {
+        const res = await fetch(url, {
+            method,
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: payload === undefined ? undefined : JSON.stringify(payload),
+        });
+        if (res.status === 204) return null;
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(apiErrorMessage(data, res.status));
+        return data;
+    }
 
+    // ----- Add / edit modal -----
+    document.querySelector('.experience-add-button')?.addEventListener('click', () => {
+        editingId = null;
+        expForm.reset();
+        expIdInput.value = '';
+        if (modalTitle) modalTitle.textContent = 'Add a New Experience';
+        if (modalSubmitBtn) modalSubmitBtn.textContent = 'Add Experience';
+    });
+
+    function openEditModal(exp) {
+        editingId = exp.id;
+        expIdInput.value = exp.id;
+        document.getElementById('id_title').value = exp.title;
+        document.getElementById('id_category').value = exp.category;
+        document.getElementById('id_description').value = exp.description;
+        document.getElementById('id_thumbnail').value = exp.thumbnail || '';
+        if (modalTitle) modalTitle.textContent = 'Edit Experience';
+        if (modalSubmitBtn) modalSubmitBtn.textContent = 'Save Changes';
+        expModal.showPopover();
+    }
+
+    async function saveExperience(event) {
+        event.preventDefault();
+        const isEdit = editingId !== null;
+        modalSubmitBtn.disabled = true;
+        try {
+            const fields = new FormData(expForm);
+            const payload = Object.fromEntries(
+                ['title', 'category', 'description', 'thumbnail'].map(name => [name, fields.get(name)]),
+            );
+            if (isEdit) {
+                await writeExperience(endpoint(DETAIL_EXP_ENDPOINT, editingId), 'PATCH', payload);
+            } else {
+                await writeExperience(BASE_EXP_ENDPOINT, 'POST', payload);
+            }
+            expForm.reset();
+            expModal.hidePopover();
+            showToast('Success', isEdit ? 'Experience updated!' : 'Experience added!', 'success');
+            await runSearch();
+        } catch (err) {
+            showToast(isEdit ? 'Failed to update experience' : 'Failed to add experience', err.message, 'error');
+        } finally {
+            modalSubmitBtn.disabled = false;
+        }
+    }
+
+    if (expForm) expForm.addEventListener('submit', saveExperience);
+
+    // ----- Delete modal -----
+    function openDeleteModal(exp) {
+        if (!deleteModal) return;
+        pendingDeleteId = exp.id;
+        deleteNameLabel.textContent = exp.title;
+        deleteModal.showPopover();
+    }
+
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            if (!pendingDeleteId) return;
+            const button = deleteForm.querySelector('button[type="submit"]');
+            button.disabled = true;
             try {
-                const res = await fetch(expForm.action, {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': getCookie('csrftoken') },
-                    body: new FormData(expForm)
-                });
-                const result = await res.json().catch(() => ({}));
-
-                if (res.ok) {
-                    closeExpModal();
-                    if(typeof showToast === 'function') showToast('Success', isEditMode ? 'Experience updated!' : 'Experience added!', 'success');
-                    runSearch();
-                } else {
-                    const errs = result.errors ? Object.values(result.errors).flat().map(e => e.message) : [result.message || 'Error occurred.'];
-                    if(typeof showToast === 'function') showToast('Failed', errs.join(' '), 'error');
-                }
+                await writeExperience(endpoint(DETAIL_EXP_ENDPOINT, pendingDeleteId), 'DELETE');
+                pendingDeleteId = null;
+                deleteModal.hidePopover();
+                showToast('Success', 'Experience deleted.', 'success');
+                await runSearch();
             } catch (err) {
-                if(typeof showToast === 'function') showToast('Failed', 'Server unreachable.', 'error');
+                showToast('Failed to delete experience', err.message, 'error');
             } finally {
-                modalSubmitBtn.disabled = false;
+                button.disabled = false;
             }
         });
     }
 
-    function openDeleteModal(experienceId, experienceTitle) {
-        const deleteModal = document.getElementById('global-experience-delete-modal');
-        if (!deleteModal) return;
+    // ----- Card buttons (event delegation) -----
+    gridContainer.addEventListener('click', async function(event) {
+        const button = event.target.closest('button[data-action]');
+        if (!button || button.disabled) return;
+        const exp = experiencesById.get(button.dataset.id);
+        if (!exp) return;
+        const action = button.dataset.action;
+        if (action === 'edit') return openEditModal(exp);
+        if (action === 'delete') return openDeleteModal(exp);
+        if (action === 'star') {
+            button.disabled = true;
+            try {
+                await writeExperience(endpoint(STAR_EXP_ENDPOINT, exp.id), 'POST');
+                showToast('Success', 'Star updated.', 'success');
+                await runSearch();
+            } catch (err) {
+                showToast('Request failed', err.message, 'error');
+            } finally {
+                button.disabled = false;
+            }
+        }
+    });
 
-        document.getElementById('delete-modal-experience-name').textContent = experienceTitle;
+    // ----- Search -----
+    searchInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(runSearch, SEARCH_DELAY);
+    });
+    searchForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        clearTimeout(debounceTimer);
+        runSearch();
+    });
 
-        const form = document.getElementById('delete-modal-form');
-        const deleteUrlBase = "{% url 'main:delete_experience' '00000000-0000-0000-0000-000000000000' %}";
-        form.action = deleteUrlBase.replace('00000000-0000-0000-0000-000000000000', experienceId);
-
-        deleteModal.showPopover();
-    }
-
-    // Start
     runSearch();
     </script>
 {% endblock content %}

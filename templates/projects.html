@@ -62,7 +62,7 @@
         {% include "components/project_delete_modal.html" %}
     {% endif %}
 
-        {% csrf_token %}
+    {% csrf_token %}
     <script>
     const IS_EDITOR = "{{ is_editor|yesno:'true,false' }}" === "true";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
